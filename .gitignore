@@ -1,0 +1,17 @@
+# .NET Core / Visual Studio / C#
+[Oo]bj/
+[Bb]in/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Base de dados local SQLite (podes querer ignorar para não versionar dados de teste)
+*.db
+*.db-shm
+*.db-wal
+
+# Configurações do sistema operativo
+.DS_Store
+Thumbs.db
