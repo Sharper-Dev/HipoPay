@@ -13,6 +13,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseExceptionHandler("/error");
     app.MapOpenApi();
 }
 
@@ -21,5 +22,10 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.Map("/error", () => Results.Problem(
+    title: "An error occurred while processing your request.",
+    statusCode: 500
+));
 
 app.Run();
