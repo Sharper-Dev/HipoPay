@@ -1,0 +1,25 @@
+$kind: http-request
+name: Login
+method: POST
+url: '{{base_url}}/api/auth/login'
+order: 500
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "username": "admin",
+      "password": "password"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      const response = pm.response.json();
+      if (pm.response.code === 200 && response.token) {
+          pm.environment.set("token", response.token);
+          console.log("Token captured and stored in environment.");
+      } else {
+          console.error("Login failed. Token not captured.");
+      }

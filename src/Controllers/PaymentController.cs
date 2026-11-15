@@ -3,9 +3,11 @@ using HipoPay.Dbs;
 using HipoPay.DTOs;
 using HipoPay.Models;
 using HipoPay.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HipoPay.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class PaymentController : ControllerBase

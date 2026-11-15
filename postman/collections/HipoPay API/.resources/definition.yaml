@@ -3,3 +3,8 @@ name: HipoPay API
 description: Payment API for the HipoPay service running on localhost.
 variables:
   base_url: 'http://localhost:5244'
+auth:
+  type: bearer
+  credentials:
+    - key: token
+      value: '{{token}}'

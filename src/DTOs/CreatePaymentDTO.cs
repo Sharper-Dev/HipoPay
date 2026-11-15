@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HipoPay.DTOs
 {
-    public class CreatePaymentDTO
+    public record CreatePaymentDTO
     {
         [Required(ErrorMessage = "Receiver is required")]
         public string Receiver { get; set; } = string.Empty;
