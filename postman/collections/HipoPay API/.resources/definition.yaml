@@ -1,0 +1,5 @@
+$kind: collection
+name: HipoPay API
+description: Payment API for the HipoPay service running on localhost.
+variables:
+  base_url: 'http://localhost:5244'

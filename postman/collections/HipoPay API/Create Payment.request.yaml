@@ -1,0 +1,15 @@
+$kind: http-request
+method: POST
+url: '{{base_url}}/api/payment'
+order: 3000
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+      "receiver": "John Doe",
+      "sender": "Jane Doe",
+      "amount": 100.00,
+      "description": "Payment for services"
+    }

@@ -1,0 +1,8 @@
+$kind: http-request
+method: DELETE
+url: '{{base_url}}/api/payment/:id'
+order: 4000
+pathVariables:
+  - key: id
+    value: '1'
+    description: 'The ID of the payment to delete'

@@ -3,11 +3,11 @@ using HipoPay.Models;
 
 namespace HipoPay.Dbs
 {
-    public class TransactionsDb : DbContext
+    public class PaymentsDb : DbContext
     {
-        public TransactionsDb(DbContextOptions<TransactionsDb> options) : base(options)
+        public PaymentsDb(DbContextOptions<PaymentsDb> options) : base(options)
         {
         }
-        public DbSet<Transaction> Transactions { get; set; } = null!;
+        public DbSet<Payment> Payments { get; set; } = null!;
     }
 }

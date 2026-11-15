@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace src.Migrations
 {
-    [DbContext(typeof(TransactionsDb))]
-    [Migration("20261111002951_InitialCreate")]
+    [DbContext(typeof(PaymentsDb))]
+    [Migration("20261114141100_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace src.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.14");
 
-            modelBuilder.Entity("HipoPay.Models.Transaction", b =>
+            modelBuilder.Entity("HipoPay.Models.Payment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -38,12 +38,9 @@ namespace src.Migrations
                     b.Property<string>("Status")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Token")
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
-                    b.ToTable("Transactions");
+                    b.ToTable("Payments");
                 });
 #pragma warning restore 612, 618
         }

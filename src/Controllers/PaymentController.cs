@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using HipoPay.Dbs;
 using HipoPay.DTOs;
+using HipoPay.Models;
+using HipoPay.Services;
 
 namespace HipoPay.Controllers
 {
@@ -8,27 +10,53 @@ namespace HipoPay.Controllers
     [Route("api/[controller]")]
     public class PaymentController : ControllerBase
     {
-        [HttpGet]
-        public ActionResult<TransactionsDb> GetAll()
+        private readonly PaymentService PaymentService;
+
+        public PaymentController(PaymentService paymentService)
         {
-            return Ok(new { message = "Get all payments" });
+            PaymentService = paymentService;
+        }
+        
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Payment>>> GetAll()
+        {
+            var payments = await PaymentService.GetAllPaymentsAsync();
+            return Ok(payments);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<TransactionsDb> GetById(int id)
+        public async Task<ActionResult<Payment>> GetById(int id)
         {
-            return Ok(new { message = $"Get payment by id: {id}" });
+            var payment = await PaymentService.GetPaymentByIdAsync(id);
+            if (payment == null)
+            {
+                return NotFound( new { message = $"Payment with id {id} not found" });
+            }
+            return Ok(payment);
         }
 
         [HttpPost]
-        public IActionResult CreatePayment([FromBody] CreatePaymentDTO payment)
+        public async Task<ActionResult<Payment>> CreatePayment([FromBody] CreatePaymentDTO paymentDTO)
         {
-            return Ok(new { message = "Create payment", payment });
+            var newPayment = new Payment
+            {
+                Status = "Completed",
+                Sender = paymentDTO.Sender,
+                Receiver = paymentDTO.Receiver,
+                Amount = paymentDTO.Amount,
+                Description = paymentDTO.Description,
+                CreatedAt = DateTime.UtcNow
+            };
+            var createdPayment = await PaymentService.CreatePaymentAsync(newPayment);
+            return Created();
         }
         [HttpDelete("{id}")]
-        public IActionResult DeletePayment(int id)
+        public async Task<ActionResult> DeletePayment(int id)
         {
-            return Ok(new { message = $"Delete payment by id: {id}" });
+            var deleted = await PaymentService.DeletePaymentAsync(id);
+            if (!deleted) return NotFound(new { message = $"Payment with id {id} not found" });
+
+            return Ok(new { message = $"Payment with id {id} deleted successfully" });
         }
         // [HttpPut("{id}")]
         // public IActionResult UpdatePayment(int id, [FromBody] UpdatePaymentDTO payment)

@@ -9,15 +9,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace src.Migrations
 {
-    [DbContext(typeof(TransactionsDb))]
-    partial class TransactionsDbModelSnapshot : ModelSnapshot
+    [DbContext(typeof(PaymentsDb))]
+    partial class PaymentsDbModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.14");
 
-            modelBuilder.Entity("HipoPay.Models.Transaction", b =>
+            modelBuilder.Entity("HipoPay.Models.Payment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -32,15 +32,18 @@ namespace src.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Status")
+                    b.Property<string>("Receiver")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Token")
+                    b.Property<string>("Sender")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Transactions");
+                    b.ToTable("Payments");
                 });
 #pragma warning restore 612, 618
         }
