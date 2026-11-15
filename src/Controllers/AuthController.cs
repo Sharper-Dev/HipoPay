@@ -22,7 +22,7 @@ namespace HipoPay.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            if (request.Username == "admin" && request.Password == "password")
+            if (request.Username ==  _configuration["Admin:Username"] && request.Password == _configuration["Admin:Password"])
             {
                 var jwtSettings = _configuration.GetSection("Jwt");
                 var key = Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key is not configured"));
