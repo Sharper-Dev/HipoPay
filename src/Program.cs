@@ -6,6 +6,9 @@ using System.Text;
 using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+
 var connectionString = builder.Configuration.GetConnectionString("Payments") ?? "Data Source=payments.db";
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -15,6 +18,7 @@ var jwtAudience = jwtSettings["Audience"] ?? throw new InvalidOperationException
 
 var key = Encoding.UTF8.GetBytes(jwtKey);
 
+builder.WebHost.UseUrls($"http://*:{port}");
 builder.Services.AddRateLimiter(options =>
 {
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
@@ -72,6 +76,12 @@ builder.Services.AddScoped<PaymentService>();
 
 
 var app = builder.Build();
+
+using (var scope = ((IApplicationBuilder) app).ApplicationServices.CreateScope()) 
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<PaymentsDb>();
+    dbContext.Database.EnsureCreated();
+}
 
 if (app.Environment.IsDevelopment())
 {
