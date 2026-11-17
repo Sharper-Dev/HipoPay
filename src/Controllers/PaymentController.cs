@@ -18,7 +18,8 @@ namespace HipoPay.Controllers
         {
             PaymentService = paymentService;
         }
-        
+
+        [Authorize(Roles = "Admin,Guest")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Payment>>> GetAll()
         {
@@ -26,6 +27,7 @@ namespace HipoPay.Controllers
             return Ok(payments);
         }
 
+        [Authorize(Roles = "Admin,Guest")]
         [HttpGet("{id}")]
         public async Task<ActionResult<Payment>> GetById(int id)
         {
@@ -36,8 +38,8 @@ namespace HipoPay.Controllers
             }
             return Ok(payment);
         }
-        
-        [Authorize(Roles = "Admin")]
+
+        [Authorize(Roles = "Admin,Guest")]
         [HttpPost]
         public async Task<ActionResult<Payment>> CreatePayment([FromBody] CreatePaymentDTO paymentDTO)
         {
@@ -53,7 +55,6 @@ namespace HipoPay.Controllers
             var createdPayment = await PaymentService.CreatePaymentAsync(newPayment);
             return Created();
         }
-        
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeletePayment(int id)
@@ -63,10 +64,5 @@ namespace HipoPay.Controllers
 
             return Ok(new { message = $"Payment with id {id} deleted successfully" });
         }
-        // [HttpPut("{id}")]
-        // public IActionResult UpdatePayment(int id, [FromBody] UpdatePaymentDTO payment)
-        // {
-        //     return Ok(new { message = $"Update payment by id: {id}", payment });
-        // }
     }
 }
