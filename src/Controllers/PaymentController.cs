@@ -32,11 +32,12 @@ namespace HipoPay.Controllers
             var payment = await PaymentService.GetPaymentByIdAsync(id);
             if (payment == null)
             {
-                return NotFound( new { message = $"Payment with id {id} not found" });
+                return NotFound(new { message = $"Payment with id {id} not found" });
             }
             return Ok(payment);
         }
-
+        
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<Payment>> CreatePayment([FromBody] CreatePaymentDTO paymentDTO)
         {
@@ -52,6 +53,8 @@ namespace HipoPay.Controllers
             var createdPayment = await PaymentService.CreatePaymentAsync(newPayment);
             return Created();
         }
+        
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeletePayment(int id)
         {
