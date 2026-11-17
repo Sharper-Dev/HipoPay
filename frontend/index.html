@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HipoPay - Painel de Transações</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="./js/script.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <!-- SEÇÃO DE AUTENTICAÇÃO -->
+    <div id="auth-section" class="card">
+        <h2>HipoPay — Painel de Transações</h2>
+        <p style="font-size: 14px; margin-bottom: 15px;">
+            API RESTful em <strong>ASP.NET Core</strong> com persistência em <strong>SQLite</strong>, protegida por autenticação <strong>JWT</strong> e Rate Limiting. Feita para demonstração de portfólio backend.
+        </p>
+        <hr style="border: none; border-top: 1px solid var(--border); margin-bottom: 15px;">
+        
+        <div id="auth-alert" class="alert alert-error hidden"></div>
+        <div class="form-group">
+            <label>Usuário</label>
+            <input type="text" id="username" value="guest" placeholder="Ex: admin ou guest">
+        </div>
+        <div class="form-group">
+            <label>Senha</label>
+            <input type="password" id="password" value="guest1234" placeholder="********">
+        </div>
+        <div class="row" style="margin-bottom: 15px;">
+            <button onclick="login()">Entrar</button>
+            <button type="button" class="secondary" onclick="fillDemoCredentials('guest', 'guest1234')">Usar Demo (Guest)</button>
+        </div>
+    </div>
+
+    <!-- SEÇÃO PRINCIPAL (APP) -->
+    <div id="app-section" class="hidden">
+        <div class="card">
+            <div class="header-flex">
+                <div>
+                    <h2>Painel HipoPay</h2>
+                    <p style="margin: 4px 0 0 0; font-size: 13px;">Sistema de gestão de transferências e pagamentos em nuvem.</p>
+                    <span id="user-role-badge" style="display: inline-block; margin-top: 6px; font-size: 12px; background: #e2e8f0; padding: 2px 8px; border-radius: 12px;"></span>
+                </div>
+                <button class="secondary" onclick="logout()">Encerrar Sessão</button>
+            </div>
+        </div>
+
+        <!-- FORMULÁRIO DE PAGAMENTO (Restrito a Admin) -->
+        <div id="admin-form-card" class="card">
+            <h3>Nova Transação</h3>
+            <div id="form-alert" class="alert hidden"></div>
+            <form id="payment-form" onsubmit="createPayment(event)">
+                <div class="row">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Remetente</label>
+                        <input type="text" id="sender" required placeholder="Nome do remetente">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Destinatário</label>
+                        <input type="text" id="receiver" required placeholder="Nome do destinatário">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Valor ($)</label>
+                        <input type="number" step="0.01" id="amount" required placeholder="0.00">
+                    </div>
+                    <div class="form-group" style="flex: 2;">
+                        <label>Descrição</label>
+                        <input type="text" id="description" placeholder="Motivo da transferência">
+                    </div>
+                </div>
+                <button type="submit">Cadastrar Transação</button>
+            </form>
+        </div>
+
+        <!-- AVISO PARA GUEST -->
+        <div id="guest-notice" class="card hidden" style="background-color: #fef9c3; border-color: #fde047;">
+            <p style="margin: 0; font-size: 14px;">👁️ <strong>Modo de Demonstração (Visitante):</strong> Você possui acesso de leitura ao sistema. A criação e exclusão de transações estão restritas a administradores.</p>
+        </div>
+
+        <!-- LISTAGEM DE TRANSAÇÕES -->
+        <div class="card">
+            <h3>Histórico de Transações</h3>
+            <button class="secondary" onclick="loadPayments()" style="margin-bottom: 10px; padding: 6px 10px; font-size: 12px;">Atualizar Lista</button>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Remetente</th>
+                            <th>Destinatário</th>
+                            <th>Valor</th>
+                            <th>Descrição</th>
+                            <th id="th-actions" class="hidden">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="payments-table-body">
+                        <tr><td colspan="6" style="text-align: center;">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

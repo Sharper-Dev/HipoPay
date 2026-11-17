@@ -1,0 +1,83 @@
+:root {
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --danger: #dc2626;
+    --danger-hover: #b91c1c;
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --text: #1e293b;
+    --border: #cbd5e1;
+    --error: #dc2626;
+    --success: #16a34a;
+}
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+.container {
+    width: 100%;
+    max-width: 900px;
+}
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+h2, h3 { margin-top: 0; }
+p { line-height: 1.5; color: #475569; }
+.form-group {
+    margin-bottom: 12px;
+}
+label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+button {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+}
+button:hover { background-color: var(--primary-hover); }
+button.secondary { background-color: #64748b; }
+button.secondary:hover { background-color: #475569; }
+button.danger { background-color: var(--danger); padding: 6px 10px; font-size: 12px; }
+button.danger:hover { background-color: var(--danger-hover); }
+.row { display: flex; gap: 10px; }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+th, td {
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+}
+th { background-color: #f1f5f9; }
+.hidden { display: none !important; }
+.alert {
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+.alert-error { background-color: #fee2e2; color: var(--error); border: 1px solid #fca5a5; }
+.alert-success { background-color: #dcfce7; color: var(--success); border: 1px solid #86efac; }
+.header-flex { display: flex; justify-content: space-between; align-items: center; }
