@@ -1,4 +1,4 @@
-const API_URL = "https://hipopay.onrender.com/";
+const API_URL = "https://hipopay.onrender.com";
 let currentUserRole = "";
 
 window.onload = async () => {
