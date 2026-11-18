@@ -1,13 +1,28 @@
-const API_URL = "https://hipopay.onrender.com";
+const API_URL = "https://hipopay.onrender.com/";
 let currentUserRole = "";
 
-window.onload = () => {
+window.onload = async () => {
+    await checkApiHealth();
     const token = localStorage.getItem("hipopay_token");
     if (token) {
         showApp();
         loadPayments();
     }
 };
+
+async function checkApiHealth() {
+    const statusBox = document.getElementById('api-status');
+    try {
+        statusBox.textContent = "Acordando o servidor no Render (pode demorar alguns segundos)...";
+        await fetch(`${API_URL}/api/payment`, { method: 'HEAD' });
+        statusBox.className = "alert alert-success";
+        statusBox.textContent = "API online e pronta!";
+        setTimeout(() => statusBox.classList.add('hidden'), 3000);
+    } catch (err) {
+        statusBox.className = "alert alert-warning";
+        statusBox.textContent = "Servidor iniciando no Render. A primeira requisição pode demorar até 50 segundos.";
+    }
+}
 
 function fillDemoCredentials(user, pass) {
     document.getElementById('username').value = user;
@@ -27,11 +42,12 @@ async function login() {
             body: JSON.stringify({ username, password })
         });
 
-        if (!response.ok) throw new Error("Credenciais inválidas.");
+        if (!response.ok) throw new Error("Usuário ou senha inválidos.");
 
         const data = await response.json();
         localStorage.setItem("hipopay_token", data.token);
-        
+        localStorage.setItem("hipopay_user", username);
+
         showApp();
         loadPayments();
     } catch (err) {
@@ -42,6 +58,7 @@ async function login() {
 
 function logout() {
     localStorage.removeItem("hipopay_token");
+    localStorage.removeItem("hipopay_user");
     document.getElementById('app-section').classList.add('hidden');
     document.getElementById('auth-section').classList.remove('hidden');
 }
@@ -50,70 +67,74 @@ function showApp() {
     document.getElementById('auth-section').classList.add('hidden');
     document.getElementById('app-section').classList.remove('hidden');
 
+    const savedUser = localStorage.getItem("hipopay_user") || "Usuário";
+    document.getElementById('display-username').textContent = savedUser;
+
     const token = localStorage.getItem("hipopay_token");
     try {
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
         const payload = JSON.parse(window.atob(base64));
-        
-        currentUserRole = payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || payload["role"] || "Usuário";
-        document.getElementById('user-role-badge').textContent = `Perfil: ${currentUserRole}`;
 
-        const thActions = document.getElementById('th-actions');
-        if (currentUserRole === 'Visitor' || currentUserRole === 'guest') {
-            document.getElementById('admin-form-card').classList.add('hidden');
-            document.getElementById('guest-notice').classList.remove('hidden');
-            thActions.classList.add('hidden');
-        } else {
-            document.getElementById('admin-form-card').classList.remove('hidden');
-            document.getElementById('guest-notice').classList.add('hidden');
-            thActions.classList.remove('hidden');
-        }
-    } catch(e) {
-        console.error("Erro ao ler role do token", e);
+        currentUserRole = payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || payload["role"] || "Usuário";
+        document.getElementById('user-role-badge').textContent = currentUserRole;
+    } catch (e) {
+        currentUserRole = "Usuário";
     }
+}
+
+function formatBRL(value) {
+    return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
 async function loadPayments() {
     const token = localStorage.getItem("hipopay_token");
-    const tbody = document.getElementById('payments-table-body');
-    const isAdmin = currentUserRole !== 'Visitor' && currentUserRole !== 'guest';
-    const colSpanCount = isAdmin ? 6 : 5;
-    
+    const feed = document.getElementById('transactions-feed');
+    const isAdmin = currentUserRole === 'Admin';
+
     try {
         const response = await fetch(`${API_URL}/api/payment`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
-        if (!response.ok) throw new Error("Erro ao carregar dados.");
+        if (!response.ok) throw new Error("Erro ao carregar extrato.");
 
         const payments = await response.json();
-        tbody.innerHTML = "";
+        feed.innerHTML = "";
+
+        const total = payments.reduce((acc, item) => acc + Number(item.amount || 0), 0);
+        document.getElementById('total-volume').textContent = formatBRL(total);
 
         if (payments.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="${colSpanCount}" style="text-align: center;">Sem transações cadastradas.</td></tr>`;
+            feed.innerHTML = `<p class="empty-state">Nenhuma transferência realizada ainda.</p>`;
             return;
         }
 
-        payments.forEach(p => {
-            const tr = document.createElement('tr');
-            let rowHtml = `
-                <td>${p.id}</td>
-                <td>${escapeHtml(p.sender || '-')}</td>
-                <td>${escapeHtml(p.receiver || '-')}</td>
-                <td>$${Number(p.amount).toFixed(2)}</td>
-                <td>${escapeHtml(p.description || '-')}</td>
+        payments.slice().reverse().forEach(p => {
+            const item = document.createElement('div');
+            item.className = 'tx-item';
+
+            const deleteBtn = isAdmin
+                ? `<button class="btn-delete-tx" onclick="deletePayment(${p.id})" title="Estornar/Excluir">Estornar</button>`
+                : '';
+
+            item.innerHTML = `
+                <div class="tx-left">
+                    <div class="tx-icon">↗</div>
+                    <div class="tx-details">
+                        <span class="tx-parties">${escapeHtml(p.sender || 'Origem')} → ${escapeHtml(p.receiver || 'Destino')}</span>
+                        <span class="tx-desc">#${p.id} • ${escapeHtml(p.description || 'Transferência HipoPay')}</span>
+                    </div>
+                </div>
+                <div class="tx-right">
+                    <span class="tx-amount">${formatBRL(p.amount)}</span>
+                    ${deleteBtn}
+                </div>
             `;
-
-            if (isAdmin) {
-                rowHtml += `<td><button class="danger" onclick="deletePayment(${p.id})">Excluir</button></td>`;
-            }
-
-            tr.innerHTML = rowHtml;
-            tbody.appendChild(tr);
+            feed.appendChild(item);
         });
     } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="${colSpanCount}" style="text-align: center; color: var(--error);">Erro ao conectar à API.</td></tr>`;
+        feed.innerHTML = `<p class="empty-state" style="color: var(--danger);">Não foi possível conectar ao servidor.</p>`;
     }
 }
 
@@ -140,18 +161,15 @@ async function createPayment(event) {
             body: JSON.stringify(payload)
         });
 
-        if (response.status === 403) {
-            throw new Error("Acesso negado (403): Contas de visitante não podem criar transações.");
-        }
         if (!response.ok) {
-            throw new Error("Erro ao criar transação. Verifique os dados.");
+            throw new Error("Não foi possível concluir a transferência. Verifique os campos.");
         }
 
         document.getElementById('payment-form').reset();
         alertBox.className = "alert alert-success";
-        alertBox.textContent = "Transação cadastrada com sucesso!";
+        alertBox.textContent = "Transferência enviada com sucesso!";
         alertBox.classList.remove('hidden');
-        
+
         loadPayments();
     } catch (err) {
         alertBox.className = "alert alert-error";
@@ -161,24 +179,22 @@ async function createPayment(event) {
 }
 
 async function deletePayment(id) {
-    if (!confirm(`Tem certeza que deseja excluir a transação #${id}?`)) return;
+    if (!confirm(`Deseja estornar e remover a transferência #${id}?`)) return;
 
     const token = localStorage.getItem("hipopay_token");
 
     try {
         const response = await fetch(`${API_URL}/api/payment/${id}`, {
             method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (response.status === 403) {
-            alert("Acesso negado (403): Apenas administradores podem excluir transações.");
+            alert("Acesso negado (403): Apenas administradores podem estornar transações.");
             return;
         }
         if (!response.ok) {
-            throw new Error("Erro ao excluir transação.");
+            throw new Error("Erro ao estornar transferência.");
         }
 
         loadPayments();
@@ -188,5 +204,8 @@ async function deletePayment(id) {
 }
 
 function escapeHtml(str) {
-    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
 }

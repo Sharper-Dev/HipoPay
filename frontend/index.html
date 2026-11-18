@@ -3,106 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HipoPay - Painel de Transações</title>
+    <title>HipoPay — Carteira Digital</title>
     <link rel="stylesheet" href="./css/style.css">
     <script src="./js/script.js"></script>
 </head>
 <body>
 
-<div class="container">
-    <!-- SEÇÃO DE AUTENTICAÇÃO -->
-    <div id="auth-section" class="card">
-        <h2>HipoPay — Painel de Transações</h2>
-        <p style="font-size: 14px; margin-bottom: 15px;">
-            API RESTful em <strong>ASP.NET Core</strong> com persistência em <strong>SQLite</strong>, protegida por autenticação <strong>JWT</strong> e Rate Limiting. Feita para demonstração de portfólio backend.
+<div class="app-wrapper">
+
+    <div id="api-status" class="alert alert-warning">Verificando conexão com a API no Render...</div>
+
+    <section id="auth-section" class="card auth-card">
+        <div class="brand-header">
+            <div class="logo-circle">H</div>
+            <div>
+                <h1>HipoPay</h1>
+                <span class="subtitle">Pagamentos & Transferências Instantâneas</span>
+            </div>
+        </div>
+        <p class="api-desc">
+            API RESTful em <strong>ASP.NET Core</strong> com <strong>SQLite</strong>, autenticação <strong>JWT</strong>, controle de acesso (RBAC) e Rate Limiting.
         </p>
-        <hr style="border: none; border-top: 1px solid var(--border); margin-bottom: 15px;">
-        
+
         <div id="auth-alert" class="alert alert-error hidden"></div>
-        <div class="form-group">
-            <label>Usuário</label>
-            <input type="text" id="username" value="guest" placeholder="Ex: admin ou guest">
-        </div>
-        <div class="form-group">
-            <label>Senha</label>
-            <input type="password" id="password" value="guest1234" placeholder="********">
-        </div>
-        <div class="row" style="margin-bottom: 15px;">
-            <button onclick="login()">Entrar</button>
-            <button type="button" class="secondary" onclick="fillDemoCredentials('guest', 'guest1234')">Usar Demo (Guest)</button>
-        </div>
-    </div>
 
-    <!-- SEÇÃO PRINCIPAL (APP) -->
-    <div id="app-section" class="hidden">
-        <div class="card">
-            <div class="header-flex">
-                <div>
-                    <h2>Painel HipoPay</h2>
-                    <p style="margin: 4px 0 0 0; font-size: 13px;">Sistema de gestão de transferências e pagamentos em nuvem.</p>
-                    <span id="user-role-badge" style="display: inline-block; margin-top: 6px; font-size: 12px; background: #e2e8f0; padding: 2px 8px; border-radius: 12px;"></span>
+        <div class="form-group">
+            <label for="username">Usuário</label>
+            <input type="text" id="username" value="" placeholder="Digite seu usuário">
+        </div>
+        <div class="form-group">
+            <label for="password">Senha</label>
+            <input type="password" id="password" value="" placeholder="••••••••">
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-primary w-full" onclick="login()">Acessar Carteira</button>
+            <button type="button" class="btn-ghost w-full" onclick="fillDemoCredentials('guest', 'guest1234')">Preencher Conta Visitante (Demo)</button>
+        </div>
+    </section>
+
+    <main id="app-section" class="hidden">
+        <header class="wallet-header">
+            <div class="wallet-top">
+                <div class="user-info">
+                    <span class="greeting">Olá, <strong id="display-username">Usuário</strong></span>
+                    <span id="user-role-badge" class="badge">Perfil</span>
                 </div>
-                <button class="secondary" onclick="logout()">Encerrar Sessão</button>
+                <button class="btn-logout" onclick="logout()">Sair</button>
             </div>
-        </div>
+            <div class="balance-box">
+                <span class="balance-label">Volume Total Movimentado</span>
+                <div class="balance-value" id="total-volume">R$ 0,00</div>
+            </div>
+        </header>
 
-        <!-- FORMULÁRIO DE PAGAMENTO (Restrito a Admin) -->
-        <div id="admin-form-card" class="card">
-            <h3>Nova Transação</h3>
+        <section id="admin-form-card" class="card transfer-card">
+            <div class="card-title">
+                <span>💸</span>
+                <h2>Nova Transferência</h2>
+            </div>
+
             <div id="form-alert" class="alert hidden"></div>
+
             <form id="payment-form" onsubmit="createPayment(event)">
-                <div class="row">
-                    <div class="form-group" style="flex: 1;">
-                        <label>Remetente</label>
-                        <input type="text" id="sender" required placeholder="Nome do remetente">
+                <div class="amount-input-wrapper">
+                    <span class="currency-prefix">R$</span>
+                    <input type="number" step="0.01" min="0.01" id="amount" required placeholder="0,00">
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="sender">De (Pagador)</label>
+                        <input type="text" id="sender" required placeholder="Ex: João Silva">
                     </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>Destinatário</label>
-                        <input type="text" id="receiver" required placeholder="Nome do destinatário">
+                    <div class="form-group">
+                        <label for="receiver">Para (Chave / Destinatário)</label>
+                        <input type="text" id="receiver" required placeholder="Ex: Maria Souza">
                     </div>
                 </div>
-                <div class="row">
-                    <div class="form-group" style="flex: 1;">
-                        <label>Valor ($)</label>
-                        <input type="number" step="0.01" id="amount" required placeholder="0.00">
-                    </div>
-                    <div class="form-group" style="flex: 2;">
-                        <label>Descrição</label>
-                        <input type="text" id="description" placeholder="Motivo da transferência">
-                    </div>
+
+                <div class="form-group">
+                    <label for="description">Mensagem / Descrição</label>
+                    <input type="text" id="description" required placeholder="Ex: Pagamento referente ao serviço...">
                 </div>
-                <button type="submit">Cadastrar Transação</button>
+
+                <button type="submit" class="btn-primary w-full">Confirmar Transferência</button>
             </form>
-        </div>
+        </section>
 
-        <!-- AVISO PARA GUEST -->
-        <div id="guest-notice" class="card hidden" style="background-color: #fef9c3; border-color: #fde047;">
-            <p style="margin: 0; font-size: 14px;">👁️ <strong>Modo de Demonstração (Visitante):</strong> Você possui acesso de leitura ao sistema. A criação e exclusão de transações estão restritas a administradores.</p>
-        </div>
-
-        <!-- LISTAGEM DE TRANSAÇÕES -->
-        <div class="card">
-            <h3>Histórico de Transações</h3>
-            <button class="secondary" onclick="loadPayments()" style="margin-bottom: 10px; padding: 6px 10px; font-size: 12px;">Atualizar Lista</button>
-            <div style="overflow-x: auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Remetente</th>
-                            <th>Destinatário</th>
-                            <th>Valor</th>
-                            <th>Descrição</th>
-                            <th id="th-actions" class="hidden">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="payments-table-body">
-                        <tr><td colspan="6" style="text-align: center;">Carregando...</td></tr>
-                    </tbody>
-                </table>
+        <section class="card">
+            <div class="feed-header">
+                <h3>Extrato de Movimentações</h3>
+                <button class="btn-refresh" onclick="loadPayments()">↻ Atualizar</button>
             </div>
-        </div>
-    </div>
+            <div id="transactions-feed" class="transactions-list">
+                <p class="empty-state">Carregando movimentações...</p>
+            </div>
+        </section>
+    </main>
 </div>
 
 </body>
