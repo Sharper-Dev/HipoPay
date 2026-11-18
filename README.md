@@ -1,6 +1,6 @@
 # HipoPay
 
-Carteira digital e área de transferência instantânea construída para demonstrar arquitetura RESTful e controle de acesso baseado em perfis (RBAC).
+Simulação de uma carteira digital construída para demonstrar arquitetura RESTful e controle de acesso baseado em perfis (RBAC).
 
 * **Frontend:** [sharper.dev.br/HipoPay/](https://sharper.dev.br/HipoPay/)
 * **API:** `https://hipopay.onrender.com`
